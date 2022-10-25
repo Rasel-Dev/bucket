@@ -2,14 +2,14 @@ from bin import (
     HUB,
     List,
     parse,
-    os,
+    listdir,
     clone,
     __BASE__,
     HUB_DIR,
-    push,grab
+    push,
+    grab,
+    tabulate
 )
-
-from sys import argv
 
 ## ---- options ----- #
 parse.add_option('-l','--list',dest="dirlist",help=f"Example: -l [{' | '.join(i for i in HUB_DIR)}]",metavar="dirname")
@@ -26,10 +26,10 @@ parse.add_option('-g',dest="grab",help="Example: -g [ clip | template ]",metavar
 
 if option.dirlist in HUB_DIR:
     List(option.dirlist)
-elif option.Tempclone in os.listdir(f"{__BASE__}/templates/"):
+elif option.Tempclone in listdir(HUB[0]):
     clone()
 elif option.hubs == True:
-    print(", ".join(os.listdir(__BASE__)))
+    print("\n"+tabulate([listdir(__BASE__)],tablefmt="rounded_grid")+"\n")
 elif option.push in ["clip","template"]:
     push(option.push,option.title)
 elif option.grab in ["clip","template"]:
