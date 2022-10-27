@@ -5,6 +5,7 @@ from os.path import (
     isfile,
     join as path_join,
     basename,
+    split as path_split
 )
 from optparse import OptionParser
 from pathlib import Path
@@ -14,7 +15,7 @@ from tabulate import tabulate
 from colorama import init
 
 ## ------------- Variable -------------- ##
-red, green, yellow, white, reset  = ("\033[31;1m", "\033[32;1m", "\033[33;1m", "\033[37;1m", "\033[00;1m")
+red, green, yellow, white, reset,pink  = ("\033[31;1m", "\033[32;1m", "\033[33;1m", "\033[37;1m", "\033[00;1m","\033[32;5m")
 parse = OptionParser()
 HUB_DIR = ("templates","snippers")
 __BASE__ = path_join(Path.home(),".bucket")
@@ -55,6 +56,20 @@ def push(arg,title):  #TODO -> FEATURE -> upcoming binary backup
             with open(clip_write_filename,'w') as files:
                 files.write(clip_data)
             print(f"{green}[+]{white} Clip written to {green}'{basename(clip_write_filename)}'{white} successfully created")
+    elif arg == 'template':
+        if not title:
+            print(f"{yellow}[!]{white} you must specify a {red}title\n{green}[+] {white}use {green}--title {white}to set the {green}title")
+            return
+        template_src = path_join(getcwd(),*path_split(title))
+        template_dest = path_join(HUB[0],*path_split(title))
+        if isdir(template_src):#TODO -> Need To Add Database -> Store Path information
+            try:
+                shutil.copytree(template_src,template_dest,dirs_exist_ok=True)
+            except Exception as e:
+                print(f"{yellow}[!] {red} {e.errno}")
+        else:
+            shutil.copy(template_src,template_dest)
+        print(f"{green}[+]{white} Template copied to {green}'{title}'{white} successfully created")
 
 def grab(arg,others):
     if arg == 'clip':
@@ -78,14 +93,25 @@ def grab(arg,others):
                 print(f"[!] '{title}' not found !")
             else:
                 if isdir(path_join(HUB[0],dirs[(dir_index:=dirs.index(title))])):
-                    shutil.copytree(path_join(HUB[0],dirs[dir_index]),path_join(getcwd(),title))
+                    try:
+                        shutil.copytree(path_join(HUB[0],dirs[dir_index]),path_join(getcwd(),title),dirs_exist_ok=True)
+                    except FileExistsError as e:
+                        print(f"{yellow}[!] {red} '{title}' {white}{e.strerror.replace('file','Directory')}")
                 elif isfile(path_join(HUB[0],dirs[dir_index])):
                     shutil.copy(path_join(HUB[0],dirs[dir_index]),path_join(getcwd(),title))
-            print(title)
-        return
+        print(f"{green}[+]{white} Template copied to {green}'{title}'{white} successfully created")
+    return
 
 
 
 if __name__ == "bin":
+    print(f"""{white}
+\t█▄▀▄▀▄█
+\t█{pink}░▀░▀░{reset}█▄
+\t█{pink}░▀░░░{reset}█─█
+\t█{pink}░░░▀░{reset}█▄▀
+\t▀▀▀▀▀▀▀
+\t BUCKET{reset}
+""")
     init()
     check()
